@@ -1,0 +1,516 @@
+consultantjay@yahoo.com
+9422749128
+
+1)mongod -> server
+
+2)optional -> mongod
+
+take a new command prompt for importing data
+3)mongoimport -d demo -c emp --type csv --headerline --file "C:\Training\All_Samp_Data.csv"
+
+4)default test
+db
+test
+show dbs
+use demo
+show collections
+db
+demo
+emp
+db.emp.find().count()
+
+/cond/
+.* -any
+^ start
+$ ends
+! -case
+
+
+5)we should not import in mongo shard query
+
+db.emp.find().pretty()
+db.emp.find({},{_id:0,firstName:0,Salary:0}).limit(1).pretty()
+db.emp.find({"dept":"HR"},{_id:0,firstName:0,Salary:0}).pretty()
+db.emp.find({Salary:{$gt:90000}}).pretty()
+db.emp.find({Salary:{$gte:90000}}).pretty()
+db.emp.find({Salary:{$lt:90000}}).pretty()
+db.emp.find({Salary:{$lte:90000}}).pretty()
+db.emp.find({Salary:{$gte:10000},Salary:{$lte:20000}}).pretty()
+db.emp.find({dept:"Purchase"}).pretty() - this also will work
+db.emp.find({"City":"Mumbai"},{id:1,firstName:1}).pretty()
+db.emp.find({"dept":{$in:(["HR","Design","Sales"])}}).pretty()
+db.emp.find({"dept":{$nin:(["HR","Design","Sales"])}}).pretty()
+db.emp.find({},{_id:0,Salary:1}).sort({Salary:-1})
+db.emp.find({id:{$eq:1501}}).pretty()
+db.emp.find({firstName:/^D.*/}).count()
+db.emp.find({firstName:/^d.*/}).count()
+db.emp.find({firstName:/^d.*/i}).count()
+db.emp.find({firstName:/.*e$/i}).count()
+db.emp.find({firstName:/^a.*y$/i}).count()
+db.emp.find({firstName:/^A.*/},{firstName:/.*y$/i}).pretty()
+db.emp.find({$and:[{dept:"Admin"},{City:"Mumbai"}]}).pretty()
+db.emp.find({$or:[{dept:"Admin"},{City:"Mumbai"}]}).pretty()
+db.emp.find({$nor:[{dept:"Admin"},{City:"Mumbai"}]}).count()
+db.emp.find({$and:[{Salary:{$gt:1000}},{City:{$in:["Mumbai","Pune","Jalgaon"]}}]}).count()
+
+Aggregate functions:-
+---------------------
+db.emp.aggregate({$match:{Salary:90000}}).pretty()
+db.emp.aggregate({$match:{dept:"HR"}},{$project:{firstName:1,mname:1,lastName:1,_id:0}})
+db.emp.aggregate({$match:{Salary:{$gt:10000}}}).pretty()
+db.emp.aggregate({$match:{Salary:{$lt:10000}}}).pretty()
+
+db.emp.aggregate({$match:{firstName:"Tom"}},{$project:{firstName:1}}).pretty()
+db.emp.aggregate({$match:{firstName:"Tom"}},{$project:{_id:1,firstName:1}}).pretty()
+db.emp.aggregate({$match:{Salary:110000}},{$project:{_id:0,firstName:1}});
+db.emp.aggregate({$match:{dept:"HR"}},{$project:{_id:0,firstName:1,mname:1,lastName:1}});
+db.emp.aggregate({$match:{Salary:{$gte:10000,$lte:20000}}}).pretty()
+db.emp.aggregate({$match:{Salary:{$lt:90000}}}).pretty()
+db.emp.aggregate({$match:{Salary:{$gte:200000}}})
+db.emp.aggregate({$match:{Salary:{$lte:200000}}})
+db.emp.aggregate({$match:{id:{$eq:1501}}})
+db.emp.aggregate({$match:{id:{$ne:1501}}})
+db.emp.aggregate({$match:{dept:{$in:["HR","Design","Sales"]}}})
+db.emp.aggregate({$match:{dept:{$nin:["Production","purchase"]}}})
+db.emp.aggregate({$match:{$and:[{dept:"Admin"},{City:"Mumbai"}]}})
+db.emp.aggregate({$match:{$and:[{Salary:{$gt:50000}},{City:{$in:["Mumbai","Pune","Jalgaon"]}}]}})
+db.emp.aggregate({$match:{$and:[{City:"Mumbai"},{dept:"Admin"}]}})
+db.emp.aggregate({$match:{$or:[{City:"Pune"},{dept:"Admin"}]}})
+db.emp.aggregate({$match:{$nor:[{City:"Pune"},{dept:"Mumbai"}]}})
+db.emp.aggregate([{$match:{"Dept":{$in:(["Production","purchase"])}}},{$project:{"firstName":1,"_id":0,"Salary":1}}])
+
+====
+db.emp.aggregate([{$group:{_id:"$dept"}}])
+db.emp.aggregate([{$group:{_id:"$dept",Salary:{$min:"$Salary"}}}])
+db.emp.aggregate([{$group:{_id:"Min",Salary:{$min:"$Salary"}}}])
+db.emp.aggregate([{$group:{_id:"Max",Salary:{$max:"$Salary"}}}])
+db.emp.aggregate([{$group:{_id:"$Dept",AvgSalary:{$avg:"$Salary"},MinSalary:{$min:"$Salary"},MaxSalary:{$max:"$Salary"}}}])
+db.emp.aggregate([{$group:{_id:"$dept",SalaryAvg:{$avg:"$Salary"},Salarymin:{$min:"$Salary"},Salarymax:{$max:"$Salary"}}}])
+db.emp.aggregate({$group:{_id:"$dept",Count:{$sum:1}}})
+db.emp.aggregate({$group:{_id:"ALL",Count:{$sum:1}}})
+db.emp.aggregate({$match:{City:{$in:["Mumbai","Pune"]}}},{$group:{_id:"$dept",Salary:{$min:"$Salary"}}})
+
+Update Operators:-
+($inc,$set,$max,$min,$mul,$rename,$unset)
+
+db.emp.update({},{},{})
+db.emp.update({where},{fields},{condition->multi:true})
+db.emp.update({where},{$set:{K:V}},{condition->multi:true})
+
+db.emp.update({id:1621},{$set:{Salary:4000}})
+db.emp.update({id:1621},{$inc:{Salary:1000}})
+db.emp.update({id:1621},{$min:{Salary:5000}})
+db.emp.update({id:1621},{$max:{Salary:5000}})
+db.emp.update({id:1621},{$set:{Company:"LTI"}}) => If field is not there it will add new field
+db.emp.update({id:1621},{$rename:{Company:"Comp"}})
+db.emp.update({id:1621},{$rename:{Company:"Comp"}})
+
+db.emp.update({id:1000},{$set:{Company:"Zensar"}},{upsert:true})
+db.emp.update({},{$set:{Company:"Zensar"}},{multi:true})
+db.emp.update({City:{$in:["Nashik","Jalgaon"]}},{$inc:{Salary:1000}},{multi:true})
+db.emp.update({City:{$in:["Mumbai","Pune"]}},{$inc:{Salary:-1000}},{multi:true})
+db.emp.update({$and:[{Salary:{$lte:30000}},{City:{$in:["Mumbai","Pune","Jalgaon","Nashik"]}}]},{$inc:{Salary:10000}},{multi:true})
+db.emp.update({$and:[{Salary:{$gte:100000}},{City:{$in:["Mumbai","Pune","Jalgaon","Nashik"]}}]},{$inc:{Salary:-10000}},{multi:true})
+
+Replication:-
+============
+mongod --dbpath "C:\data\ltirepl" --port 3000
+ip/host/mc - port
+
+mongod --port 30001 -dbpath "C:\data\ltirepl\one" --replSet Swap
+mongod --port 30002 -dbpath "C:\data\ltirepl\two" --replSet Swap
+mongod --port 30003 -dbpath "C:\data\ltirepl\three" --replSet Swap
+
+mongo --port 30001
+rs.initiate()
+rs.add("localhost:30002")
+rs.add("localhost:30003")
+rs.status()
+use demo
+db.emp.insert({"Name":"Jay"})
+show dbs
+db.emp.find()
+
+mongo --port 30002
+rs.slaveok()
+show dbs
+
+mongo --port 30003
+rs.slaveok()
+show dbs
+============
+mongod --port 30001 -dbpath "C:\data\ltirepl1\one" --replSet Swap
+mongod --port 30002 -dbpath "C:\data\ltirepl1\two" --replSet Swap
+mongod --port 30003 -dbpath "C:\data\ltirepl1\three" --replSet Swap
+
+mongo --port 30001
+rs.initiate()
+rs.add("localhost:30002")
+rs.addArb("localhost:30003")
+rs.status()
+use demo
+db.emp.insert({"Name":"Jay"})
+show dbs
+db.emp.find()
+
+mongo --port 30002
+rs.slaveok()
+show dbs
+
+mongo --port 30003
+rs.slaveok()
+show dbs
+========
+rs.add( { host: "localhost:30002", priority: 0, votes: 0 } )
+===============================================================
+Storage Engine:-
+---------------
+mongod --storageEngine=mmapv1 --dbpath c:\data\ltirepl\mmpv
+mongod --storageEngine wiredTiger --port 3000 --dbpath c:\data\ltirepl\wt
+=====================
+db.emp.update({firstName:{$exists:false}},{$set:{Salary:"One"}})
+db.emp.find({"Salary":{$exists:true}}).pretty()
+db.emp.find({Salary:{$type:"string"}}).pretty()
+db.emp.find({Salary:{$type:1}}).count()
+
+sample dataset require - Theme require
+======================================
+Sharding:-
+---------
+Provides horizontal scaling vs vertical scaling
+Stores data across multiple machine
+Data partitioning
+High throughput
+Shard key
+Sharding with replication is recomended incase of production.
+
+start mongod --configsvr --replSet myReplica --dbpath "C:\data\mongodb\sharding\ConfigServer1" --port 27001
+start mongod --configsvr --replSet myReplica --dbpath "C:\data\mongodb\sharding\ConfigServer2" --port 27002
+start mongod --configsvr --replSet myReplica --dbpath "C:\data\mongodb\sharding\ConfigServer3" --port 27003
+start mongo --port 27001
+rs.initiate()
+rs.add("localhost:27002")
+rs.add("localhost:27003")
+rs.status()
+
+start mongos --port 30005 --configdb myReplica/localhost:27001,localhost:27002,localhost:27003
+
+start mongod --shardsvr --dbpath "C:\data\mongodb\sharding\Shard1" --port 50001 --replSet Shrd1
+start mongod --shardsvr --dbpath "C:\data\mongodb\sharding\Shard11" --port 50011 --replSet Shrd1
+start mongod --shardsvr --dbpath "C:\data\mongodb\sharding\Shard21" --port 50021 --replSet Shrd1
+start mongo --port 50001
+rs.initiate()
+rs.add("localhost:50011")
+rs.add("localhost:50021")
+rs.status()
+
+start mongod --shardsvr --dbpath "C:\data\mongodb\sharding\Shard2" --port 50002 --replSet Shrd2
+start mongod --shardsvr --dbpath "C:\data\mongodb\sharding\Shard12" --port 50012 --replSet Shrd2
+start mongod --shardsvr --dbpath "C:\data\mongodb\sharding\Shard22" --port 50022 --replSet Shrd2
+start mongo --port 50002
+rs.initiate()
+rs.add("localhost:50012")
+rs.add("localhost:50022")
+rs.status()
+
+start mongo --port 30005
+
+sh.addShard("Shrd1/localhost:50001")
+sh.addShard("Shrd2/localhost:50002")
+sh.status()
+=========================================
+Cap Collection:-
+---------------
+db.createCollection(nameOfCollection,{capped:Boolean,autoIndexId:Boolean,size:Number,max:Number})
+
+use ltidemo
+show collections
+db.createCollection("demoCap",{capped:true,size:500,max:3})
+db.demoCap.insert({name:"Eeranna"})
+db.demoCap.insert({name:"Teju"})
+db.demoCap.insert({name:"Geetha"})
+
+db.demoCap.insert({name:"Tejas"})
+
+Comparing MongoDB Backup Approaches:
+------------------------------------
+. mongodump/mongorestore
+. Storage-level Backups
+. Backup with MongoDB Management Service(MMS)
+
+
+mongodump/mongorestore
+. Can be run online or offline
+. Oplog aware for point in time restores
+. Filter in, filter out
+. Considerations:
+
+Storage-level Backups
+. Copy files in your data directory
+
+ex:1)
+mongodump
+/data/db
+27017
+to current path
+mongorestore
+/data/db2
+27008
+
+ex:2)
+export emp from demo default - 27017
+import it in new - 27008
+
+sol:1)
+start mongod --port 27017 -dbpath "C:\data\db"
+start mongod --port 27008 -dbpath "C:\data\db2"
+mongodump
+mongorestore
+
+sol:2
+mongoexport -d demo -c emp -o "C:\data\export\emp.json"
+
+mongoimport --port 27008 -d demonew -c empnew --type json --file "C:\data\export\emp.json"
+
+========================
+Project details:-
+---------------
+mongoimport -d demo -c infotel --type csv --headerline --file "C:\Training\My_Dataset\P_5_Ankit_Booking.com_v_4.2.csv"
+
+use demo
+show collections
+.emp
+.infotel
+db.infotel.find().count()
+5409
+=========================
+Indexes:-
+--------
+Indexes is use to search the documents in faster.
+It will be performance improved.
+db.emp.find().count()
+db.emp.getIndexes()
+db.emp.find({firstName:"Tom"})
+db.emp.find({firstName:"Tom"}).explain("executionStats")
+
+db.emp.ensureIndex({firstName:1})
+db.emp.getIndexes()
+db.emp.find({firstName:"Tom"}).explain("executionStats")
+========================================================
+Authentication and Authorization:-
+---------------------------------
+read
+readWrite
+dbAdmin
+userAdmin
+clusterAdmin
+Basic Authentication:
+--------------------
+use admin
+db.createUser(
+{
+	user:"Jay",
+	pwd:"password",
+	roles:["root"]
+})
+mongod --auth
+show collections
+use admin
+db.auth("Jay","password")
+show dbs
+db.system.users.find().pretty()
+db.system.roles.find().pretty()
+=================================
+Node Js:-
+---------
+What is the difference between programming and scripting?
+
+Ans: programming is compiled and excuted, scripting is not compiled.
+
+npm install yargs
+npm install -g yargs
+node Lab_2.js --name jay --age 34
+
+node Lab_2.js 34 2 *
+node Lab_2.js * 2 34
+node Lab_2.js 2 * 34
+======================================
+Blocking and non-blocking:-
+--------------------------
+Single threaded handler
+Request handler is single threaded
+
+To connect mongodb we need to install below command
+npm install mongojs
+
+save as xlsx
+var xlsx = require('node-xlsx');
+var fs = require('fs');
+var obj = xlsx.parse(__dirname+'/All_Samp_Data.xls');//parses a file
+var sheet = obj[0];
+sheet['data'][0][0]
+==========================
+Event driven programming:-
+--------------------------
+When the EventEmitter object emits an event, all of the functions 
+attached to that specific event are called EventEmiting.
+
+ThreadPool:-
+-----------
+Althogh multiple threads are running back ground, 
+node will run as singlethread request handler process for asynchronous.
+It is single threaded but can handle multiple tasks.
+
+child process
+1.ExecFile
+2.spawn
+3.exec
+4.fork
+
+Test Driven Development:-
+------------------------
+npm install -g mocha
+npm install chai
+
+NodeJs with ExpressJs:-
+-----------------------
+npm install express
+-------------------------
+Reference links:
+http://www.chaijs.com/api/bdd/
+https://nodejs.org/dist/latest-v8.x/docs/api/
+https://www.npmjs.com/
+https://expressjs.com/en/4x/api.html
+https://docs.mongodb.com/v3.6/
+========================================
+python is server side scripting language
+mongo,express,node,angular
+mongo,python,flask,angular
+=================================================
+Angular:-
+--------
+Js --> Jquery/OOPS
+
+Angular Features:
+DOM Manipulation
+Restful API
+Animation Support
+Deep Linking Routing
+Form Validation
+2Way data binding
+
+Core features:
+. Data-binding
+. Scope
+. Model View Controller
+. Services
+. Filters(Pipes)
+. Directives
+. Templates
+. Routing
+. Dependency Injection
+
+Angular Life cycle:
+1. The Bootstrap Phase
+2. The Compilation Phase
+3. The Runtime Data Binding Phase
+How to inherit in javascript:
+Using prototype
+===================
+sonarqube
+lighthouse-chrome extention
+============================
+TypeScript:-
+------------
+Three types of transpiler
+1)Traceur
+2)Babel
+3)TypeScript
+Declare its type and value in one statement.
+var name:type=value;
+
+#Scope
+--->let is block scoped
+--->var declartions are globally scoped or function/localy scoped
+--->const declarations are block scoped
+#Update and Recreated
+--->let can be updated but not re-declared
+--->var variables can be re-declared and updated
+--->const cannot be updated or re-declared
+
+var message:string ="Welcome"
+console.log(message)
+
+Type Assertion(Type Casting)
+TypeScript allows changin a variable from one type to another. TypeScript refers to this process as Type Assertion.
+
+=================================================================
+Angular:-
+--------
+>npm install -g @angular/cli
+>ng -v3
+>ng new AngDemo
+>cd AngDemo
+
+let is a local scope or block scope.
+
+There are three kinds of directives in Angular:
+1.Component Directives:router-outlet,ng-template 
+2.Attribute Directives:ngModel,ngStyle,ngClass,ngForm,ngSwitch
+3.Structural Directives:*ngFor,*ngIf,*ngSwitchDefault,*ngSwitchCase
+
+NgFor provides several exported values that can be aliased
+to local variables.
+index:Index of current item.
+even:True for an even index.
+odd:True for an odd index.
+first:True for first item.
+last:True for last item.
+
+Pipes:-
+------
+compponent ->@Component
+module ->@NgModule
+pipe ->@Pipes
+directive ->@Directive
+service ->@Injective
+
+angular cli commands
+=====================
+To create a component =>ng g c<Angular4Basics>
+To create a service =>ng g s<AngularService>
+To create a directive =>ng g d<AngularDirective>
+To create a pipe =>ng g p<AngularPipe>
+To Create a module =>ng g m<AngularModule>
+To create a class =>ng g class<AngularClass>
+
+header
+nav
+footer
+home
+about
+contact
+faq
+sidebar
+
+ng g class routerconfig
+
+Component Life Cycle Hooks:
+---------------------------
+Hooks for the component:
+constrctor
+. This is invoked when Angular creates a component.
+
+npm install bootstrap --save
+npm i ng2-search-filter --save
+npm install ngx-pagination --save
+npm install ng2-order-pipe --save
+
+
+
+
+
+
+
+
+
